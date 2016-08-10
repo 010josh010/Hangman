@@ -27,6 +27,8 @@ var guess;
 var answer;
 var answers =[];
 var defaultCategory = popMovies;
+setDefaultCategory(defaultCategory);
+
 var themeMusic; 
 
 
@@ -313,9 +315,9 @@ function startGame(){
 }
 
 document.onkeyup = function(event){
+    
     if(wins === 0){
-        keyStart.style.display = 'none';
-        setDefaultCategory(defaultCategory); 
+        keyStart.style.display = 'none'; 
         setWins(0); 
     }
     if(gameStarted){
