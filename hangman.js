@@ -1,3 +1,4 @@
+//cached elements 
 var start = document.getElementById('start'); 
 var keyStart = document.querySelector('.key-start'); 
 var intro = document.querySelector('.intro');
@@ -10,35 +11,52 @@ var winsCount = document.getElementById('wins-count');
 var hangman = document.getElementById('hangman');
 var categoryText = document.getElementById('category-text'); 
 var categoryChoiceBtn = document.getElementById('category-choice-btn'); 
-var categoryChoices = document.querySelector('.category-choices');
-var playButton = document.getElementById('play-button'); 
-var themeMusic; 
+var categoryChoices = document.querySelector('.category-choices'); 
+var playButton = document.getElementById('play-button');
+var popMoviesId =document.getElementById('popMovies'); 
+var advtId = document.getElementById('advt'); 
+var fishId = document.getElementById('fish'); 
+var dbzId = document.getElementById('dbz');
+var pokemonId = document.getElementById('pokemon'); 
 
 
+//game variables 
 var wins = 0 ,gameStarted=false;
 var guessArr = []; 
 var guess; 
 var answer;
-var answers = adventureTimeCharacters; 
-var defaultCategory = 'Adventure Time Characters'; 
+var answers =[];
+var defaultCategory = popMovies;
+var themeMusic; 
 
 
-//audio
-var soundStart = new Audio('audio/start.wav'); 
-var soundGuess1 = new Audio('audio/guess_1.wav'); 
-var soundGuess2 = new Audio('audio/guess_2.wav'); 
-var soundGrunt = new Audio('audio/grunt.mp3'); 
-var themeAdvt = new Audio('audio/advt.mp3'); 
 
 
-categoryChoices.onclick = function(){
-    console.log(this.id); 
+//functions 
+popMoviesId.onclick = function(){
+   setNewCategory(popMovies);   
+}
+
+advtId.onclick = function(){
+   setNewCategory(advt); 
+}
+
+fishId.onclick = function(){
+    setNewCategory(fish); 
+}
+
+dbzId.onclick = function(){
+   setNewCategory(dbz); 
+}
+
+pokemonId.onclick = function(){
+   setNewCategory(pokemon); 
 }
 
 
 playButton.onclick = function(){
     togglePlayButton(); 
-    togglePlay(themeAdvt, true);
+    togglePlay(themeMusic, true);
     
 }
 
@@ -88,35 +106,79 @@ function clearGuesses(){
     guessArr = []; 
     console.log('guesses cleared'); 
 }
-    
+  
 
 function loadAnswer(){
     var rand = Math.floor(Math.random() * answers.length) + 0; 
     answer = answers[rand].split(''); 
-    console.log('answer loaded')
+    console.log('answer loaded');
     
 }
 
 function putAnswer(){
      for(var i = 0; i < answer.length; i++){
         var d = document.createElement('DIV'); 
+        var blank; 
+         
         d.className +='answer-block';
         d.id = i ;
-        var blank = document.createTextNode('_');
-         
+        changeColor(d, '#000'); 
+       
         if(answer[i] === ' '){
-            blank = document.createTextNode('&');
-            d.style.borderBottom = 'none'; 
+            blank = document.createTextNode('+');
+            d.style.borderBottom = 'none';
         }
+         else if(answer[i] ==="'"){
+             blank = document.createTextNode("'"); 
+             d.style.borderBottom ='none';
+             changeColor(d, '#fff'); 
+         }
+         
+         else if(answer[i] ==='-'){
+             blank = document.createTextNode('-'); 
+             d.style.borderBottom = 'none'; 
+             changeColor(d, '#fff'); 
+         }
+         else{
+            blank = document.createTextNode('_');
+             
+         }
         answerContainer.appendChild(d);
         d.appendChild(blank);
-        d.style.color = '#000000'; 
+        
         
     }
 }
 
-function setCategory(text, newCategory){
-    categoryText.innerHTML = text; 
+function setDefaultCategory(category){
+    categoryText.innerHTML =category.name;
+    answers = category.answers;
+    setThemeMusic(category); 
+  
+}
+
+function setNewCategory(newCategory){
+    categoryText.innerHTML =newCategory.name;
+    answers = newCategory.answers;
+    isPlaying(); 
+    setThemeMusic(newCategory);
+    startGame(); 
+}
+
+function isPlaying(){
+     
+    if(themeMusic.paused === false){
+        togglePlay(themeMusic, false);
+         togglePlayButton(); 
+    }
+    
+   
+}
+
+function setThemeMusic(category){
+    
+    themeMusic = category.theme; 
+     
 }
 
 function changeColor(element, $color){
@@ -124,7 +186,7 @@ function changeColor(element, $color){
 }
 
 function getGuess(){
-     var pattern = /^[a-zA-Z]*$/; 
+     var pattern = /^[a-zA-Z0-9]*$/; 
     
      if(String.fromCharCode(event.keyCode).match(pattern)){
         guess = String.fromCharCode(event.keyCode).toLowerCase();
@@ -178,9 +240,10 @@ function wrongAnswer(num){
 }
 
 function winChecker(){
-    var flag = false; 
-    for(var i = 0; i < answerContainer.childNodes.length; i++){
-        if(answerContainer.childNodes[i].innerHTML === '_'){
+    var flag = false;
+    var nodes = answerContainer.childNodes; 
+    for(var i = 0; i < nodes.length; i++){
+        if(nodes[i].innerHTML === '_'){
             flag = true; 
             break;
         }
@@ -203,8 +266,25 @@ function lossChecker(){
 
 function winGame(){
     wins++; 
-    setWins(); 
-    gameStarted = false; 
+    setWins();
+    fillInAnswer('win'); 
+    gameStarted = false;
+}
+
+function fillInAnswer(outcome){
+    var nodes = answerContainer.childNodes; 
+    for(var i = 0 ; i < nodes.length; i++){
+        if(outcome === 'win'){
+            if(nodes[i].innerHTML !== '+'){
+            changeColor(nodes[i], 'lime'); 
+            }
+    
+        }
+        else if(outcome === 'lose'){
+            nodes[i].innerHTML = answer[i].toUpperCase(); 
+            changeColor(nodes[i], 'crimson'); 
+        }
+    }
 }
 
 function setWins(num){
@@ -217,10 +297,11 @@ function setWins(num){
 }
 
 function loseGame(){
-
+    fillInAnswer('lose'); 
     gameStarted = false; 
 }
 
+//calls 
 function startGame(){
     playAudio(soundStart); 
     changeImg(0); 
@@ -234,7 +315,7 @@ function startGame(){
 document.onkeyup = function(event){
     if(wins === 0){
         keyStart.style.display = 'none';
-        setCategory(defaultCategory); 
+        setDefaultCategory(defaultCategory); 
         setWins(0); 
     }
     if(gameStarted){
