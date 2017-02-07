@@ -13,4 +13,3 @@ If you spot a bug with hangman.js please open up an issue here
 ![alt tag](https://raw.githubusercontent.com/010josh010/Hangman/master/img/hangman.gif)
 
 
-![alt tag](https://raw.githubusercontent.com/010josh010/Hangman/master/img/hangman_example.png)
